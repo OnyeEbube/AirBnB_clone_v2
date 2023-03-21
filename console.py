@@ -118,6 +118,7 @@ class HBNBCommand(cmd.Cmd):
         """ Create an object of any class"""
         args = arg.split()
         params = {}
+        valid = None
         if len(args) < 1:
             print("** class name missing **")
             return
@@ -126,14 +127,18 @@ class HBNBCommand(cmd.Cmd):
             return
         for param in args[1:]:
             if '=' not in param:
+                vaild = False
                 continue
+            else:
+                valid = True
+            
             key, value = param.split('=')
             value = value.replace('-', ' ')
             
             if value.startswith('"'):
                 """Extract the string within the quotes"""
                 match = re.match(r'"([^"]*)"', value)
-                
+
                 if match:
                     """Replace any double quotes within the string 
                     with escaped quotes"""
@@ -144,8 +149,10 @@ class HBNBCommand(cmd.Cmd):
             params[key] = value
         
         new_instance = HBNBCommand.classes[args[0]]()
-        for key, value in params.items():
-            setattr(new_instance, key, value)
+        if valid == True:
+            for key, value in params.items():
+                setattr(new_instance, key, value)
+
         storage.save()
         print(new_instance.id)
         storage.save()
