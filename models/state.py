@@ -1,5 +1,6 @@
 #!/usr/bin/python3
-# This is the state class
+"""This is the state class"""
+
 import models
 from models import *
 from sqlalchemy import Column, String
@@ -26,4 +27,4 @@ class State(BaseModel, Base):
                 if all_cities[c_id].state_id == self.id:
                     temp.append(all_cities[c_id])
 
-            return 
+            return
