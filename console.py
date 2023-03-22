@@ -2,7 +2,6 @@
 """ Console Module """
 import cmd
 import sys
-import re
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -114,47 +113,26 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, line):
-        """Creates a new instance of BaseModel, saves it
-        Exceptions:
-            SyntaxError: when there is no args given
-            NameError: when there is no object taht has the name
-        """
+    def do_create(self, args):
+        """ Create an object of any class"""
         try:
-            if not line:
+            if not args:
                 raise SyntaxError()
-            my_list = line.split(" ")
-            obj = eval("{}()".format(my_list[0]))
-            for pair in my_list[1:]:
-                pair = pair.split('=', 1)
-                if len(pair) == 1 or "" in pair:
-                    continue
-                match = re.search('^"(.*)"$', pair[1])
-                cast = str
-                if match:
-                    value = match.group(1)
-                    value = value.replace('_', ' ')
-                    value = re.sub(r'(?<!\\)"', r'\\"', value)
-                else:
-                    value = pair[1]
-                    if "." in value:
-                        cast = float
-                    else:
-                        cast = int
-                try:
-                    value = cast(value)
-                except ValueError:
-                    pass
-                # TODO: escape double quotes for string
-                # TODO: replace '_' with spaces ' ' for string
-                setattr(obj, pair[0], value)
-            obj.save()
-            print("{}".format(obj.id))
+            arg_list = args.split(" ")
+            kw = {}
+            for arg in arg_list[1:]:
+                arg_splited = arg.split("=")
+                arg_splited[1] = eval(arg_splited[1])
+                if type(arg_splited[1]) is str:
+                    arg_splited[1] = arg_splited[1].replace("_", " ").replace('"', '\\"')
+                kw[arg_splited[0]] = arg_splited[1]
         except SyntaxError:
             print("** class name missing **")
         except NameError:
             print("** class doesn't exist **")
-
+        new_instance = HBNBCommand.classes[arg_list[0]](**kw)
+        new_instance.save()
+        print(new_instance.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -236,13 +214,11 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
-                if k.split('.')[0] == args:
-                    print_list.append(str(v))
-        else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(HBNBCommand.classes[args]).items():
                 print_list.append(str(v))
-
+        else:
+            for k, v in storage.all().items():
+                print_list.append(str(v))
         print(print_list)
 
     def help_all(self):
