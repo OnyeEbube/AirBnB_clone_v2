@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """ Console Module """
+import os
 import cmd
 import sys
 import re
