@@ -114,48 +114,47 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, arg):
-        """ Create an object of any class"""
-        args = arg.split()
-        params = {}
-        valid = None
-        if len(args) < 1:
-            print("** class name missing **")
-            return
-        elif args[0] not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-        for param in args[1:]:
-            if '=' not in param:
-                vaild = False
-                continue
-            else:
-                valid = True
-            
-            key, value = param.split('=')
-            value = value.replace('-', ' ')
-            
-            if value.startswith('"'):
-                """Extract the string within the quotes"""
-                match = re.match(r'"([^"]*)"', value)
-
+    def do_create(self, line):
+        """Creates a new instance of BaseModel, saves it
+        Exceptions:
+            SyntaxError: when there is no args given
+            NameError: when there is no object taht has the name
+        """
+        try:
+            if not line:
+                raise SyntaxError()
+            my_list = line.split(" ")
+            obj = eval("{}()".format(my_list[0]))
+            for pair in my_list[1:]:
+                pair = pair.split('=', 1)
+                if len(pair) == 1 or "" in pair:
+                    continue
+                match = re.search('^"(.*)"$', pair[1])
+                cast = str
                 if match:
-                    """Replace any double quotes within the string 
-                    with escaped quotes"""
                     value = match.group(1)
-                    value = value.replace('"', r'\"')
-            if "_" in value:
-                value = value.replace("_", " ")
-            params[key] = value
-        
-        new_instance = HBNBCommand.classes[args[0]]()
-        if valid == True:
-            for key, value in params.items():
-                setattr(new_instance, key, value)
+                    value = value.replace('_', ' ')
+                    value = re.sub(r'(?<!\\)"', r'\\"', value)
+                else:
+                    value = pair[1]
+                    if "." in value:
+                        cast = float
+                    else:
+                        cast = int
+                try:
+                    value = cast(value)
+                except ValueError:
+                    pass
+                # TODO: escape double quotes for string
+                # TODO: replace '_' with spaces ' ' for string
+                setattr(obj, pair[0], value)
+            obj.save()
+            print("{}".format(obj.id))
+        except SyntaxError:
+            print("** class name missing **")
+        except NameError:
+            print("** class doesn't exist **")
 
-        storage.save()
-        print(new_instance.id)
-        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
