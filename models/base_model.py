@@ -4,14 +4,24 @@ from sqlalchemy.ext.declarative import declarative_base
 import uuid
 import models
 from datetime import datetime
+<<<<<<< HEAD
 from sqlalchemy import Column, Integer, String, DateTime
 
 
 Base = declarative_base()
 
+=======
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, String, DateTime
+from os import environ
+>>>>>>> ed8aaf07aa53b1d46c85be0520c1020563ea4edc
 
+Base = declarative_base()
+
+s = "HBNB_TYPE_STORAGE"
 
 class BaseModel:
+<<<<<<< HEAD
     """This class defines all common attributes
     for other classes"""
     id = Column(String(60), unique=True, nullable=False, primary_key=True)
@@ -30,11 +40,39 @@ class BaseModel:
             updated_at: updated date
         """
         if kwargs:
+=======
+    """A base class for all hbnb models"""
+
+    if s in environ.keys() and environ["HBNB_TYPE_STORAGE"] == "db":
+        id = Column(
+            String(60),
+            unique=True,
+            nullable=False,
+            primary_key=True,
+            default=str(
+                uuid.uuid4()))
+        created_at = Column(
+            DateTime,
+            nullable=False,
+            default=datetime.utcnow())
+        updated_at = Column(
+            DateTime,
+            nullable=False,
+            default=datetime.utcnow())
+    def __init__(self, *args, **kwargs):
+        """Instatntiates a new model"""
+        cs = "HBNB_TYPE_STORAGE"
+        if kwargs:
+            self.id = str(uuid.uuid4())
+            self.created_at = datetime.now()
+            self.updated_at = datetime.now()
+>>>>>>> ed8aaf07aa53b1d46c85be0520c1020563ea4edc
             for key, value in kwargs.items():
                 if key == "created_at" or key == "updated_at":
                     value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
                 if key != "__class__":
                     setattr(self, key, value)
+<<<<<<< HEAD
             if "id" not in kwargs:
                 self.id = str(uuid.uuid4())
             if "created_at" not in kwargs:
@@ -44,6 +82,14 @@ class BaseModel:
         else:
             self.id = str(uuid.uuid4())
             self.created_at = self.updated_at = datetime.now()
+=======
+        elif cs not in environ.keys() or environ["HBNB_TYPE_STORAGE"] != "db":
+            self.id = str(uuid.uuid4())
+            self.created_at = self.updated_at = datetime.now()
+            models.storage.new(self)
+        else:
+            self.id = str(uuid.uuid4())
+>>>>>>> ed8aaf07aa53b1d46c85be0520c1020563ea4edc
 
     def __str__(self):
         """Returns a string representation of the instance"""
@@ -52,7 +98,6 @@ class BaseModel:
 
     def save(self):
         """Updates updated_at with current time when instance is changed"""
-        from models import storage
         self.updated_at = datetime.now()
         models.storage.new(self)
         models.storage.save()
@@ -63,6 +108,7 @@ class BaseModel:
         my_dict["__class__"] = str(type(self).__name__)
         my_dict["created_at"] = self.created_at.isoformat()
         my_dict["updated_at"] = self.updated_at.isoformat()
+<<<<<<< HEAD
         if '_sa_instance_state' in my_dict.keys():
             del my_dict['_sa_instance_state']
         return my_dict
@@ -71,3 +117,13 @@ class BaseModel:
         """ delete object
         """
         models.storage.delete(self)
+=======
+        if "_sa_instance_state" in my_dict.keys():
+            del my_dict["_sa_instance_state"]
+            models.storage.save()
+        return my_dict
+
+    def delete(self):
+        models.storage.delete(self)
+        models.storage.save()
+>>>>>>> ed8aaf07aa53b1d46c85be0520c1020563ea4edc
