@@ -1,19 +1,20 @@
 #!/usr/bin/python3
-""" """
-from tests.test_models.test_base_model import test_basemodel
+""" testing State """
+import unittest
+import pep8
 from models.state import State
 
 
-class test_state(test_basemodel):
-    """ """
+class State_testing(unittest.TestCase):
+    """ check BaseModel """
 
-    def __init__(self, *args, **kwargs):
-        """ """
-        super().__init__(*args, **kwargs)
-        self.name = "State"
-        self.value = State
+    def testpep8(self):
+        """ testing codestyle """
+        pepstylecode = pep8.StyleGuide(quiet=True)
+        path_user = 'models/state.py'
+        result = pepstylecode.check_files([path_user])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def test_name3(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.name), str)
+    def test_name(self):
+        self.assertEqual(type(State().name), str)

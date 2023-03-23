@@ -1,19 +1,24 @@
 #!/usr/bin/python3
-""" """
-from tests.test_models.test_base_model import test_basemodel
+""" testing Amenity """
+import unittest
+import pep8
 from models.amenity import Amenity
 
 
-class test_Amenity(test_basemodel):
-    """ """
+class Amenity_testing(unittest.TestCase):
+    """ check BaseModel """
 
-    def __init__(self, *args, **kwargs):
-        """ """
-        super().__init__(*args, **kwargs)
-        self.name = "Amenity"
-        self.value = Amenity
+    def testpep8(self):
+        """ testing codestyle """
+        pepstylecode = pep8.StyleGuide(quiet=True)
+        path_user = 'models/amenity.py'
+        result = pepstylecode.check_files([path_user])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def test_name2(self):
-        """ """
-        new = self.value()
-        self.assertEqual(type(new.name), str)
+    def test_name(self):
+        self.assertEqual(type(Amenity().name), str)
+
+
+if __name__ == '__main__':
+    unittest.main()
