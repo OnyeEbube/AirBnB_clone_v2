@@ -1,234 +1,228 @@
 #!/usr/bin/python3
-"""This is command line interpreter"""
+"""engine to run our program from the console"""
 import cmd
+import sys
 import re
-import json
+from shlex import split
 from models import storage
 from models.base_model import BaseModel
 from models.user import User
-from models.state import State
+from models.amenity import Amenity
 from models.city import City
 from models.place import Place
-from models.amenity import Amenity
 from models.review import Review
+from models.state import State
+
+"""parse the arguments into a list"""
 
 
 class HBNBCommand(cmd.Cmd):
-    """This interpretor interprets few commands
-    to create, recreate, update, show, and to accept
-    variable number of argumets. The default functionality
-    of the cmd module is overriden to interprete some
-    commands not having defult structrue of cmd module.
+    """here we will add methods in order to run all the basic
+    commands on the project
+    We shall use our own personal prompt
     """
 
-    prompt = "(hbnb) "
+    prompt = '(hbnb) '
+    __classes = {
+        "BaseModel",
+        "User",
+        "State",
+        "City",
+        "Amenity",
+        "Place",
+        "Review"
+    }
 
-    __classNames = [
-            "BaseModel",
-            "User",
-            "State",
-            "City",
-            "Place",
-            "Amenity",
-            "Review"]
+    def do_EOF(self, line):
+        """to catch the end of file and control+ D"""
+        return True
 
-    def precmd(self, line):
-        """Overriding defult functionality of precmd method"""
-        match = re.search(r"^(\w+)\.(\w+)(?:\(([\S|\s]*)\))$", line)
-        if match:
-            arg = line.split()
-            className, command, args = match.groups()
-            args = args.replace('"', "")
+    def do_quit(self, line):
+        """the quit command should exit the programe"""
+        sys.exit(1)
 
-            if "," in args:
-                if match := re.search(r"(\S+), (\S+), (\S+)", args):
-                    arg1 = match.group(1).replace('"', "")
-                    arg2 = match.group(2).replace('"', "")
-                    arg3 = match.group(3).replace('"', "")
-                    line = "{} {} {} {} {}".format(
-                            command, className, arg1, arg2, arg3
-                            )
-                elif match := re.search(r"\.", line):
-                    args = [line[: match.span()[0]], line[match.span()[1]:]]
-                    match = re.search(r"\(", args[1])
-                    command = [
-                            args[1][: match.span()[0]],
-                            args[1][match.span()[1]:]
-                            ]
-                    if match := re.search(r'"(.*?)\", (.*)\)', command[1]):
-                        _id = match.group(1)
-                        _dict = match.group(2).replace("'", '"')
-                        line = "{} {} {} .{}".format(
-                                command[0], args[0], _id, _dict
-                                )
-            else:
-                line = "{} {} {}".format(command, className, args)
-        return cmd.Cmd.precmd(self, line)
+    def emptyline(self):
+        """overide new line to not execute anything"""
+        pass
 
-
-    def do_create(self, line):
-        """Creates a new instance of BaseModel, saves it
-        Exceptions:
-            SyntaxError: when there is no args given
-            NameError: when there is no object taht has the name
-        """
+    def do_create(self, args):
+        """creates a new instance of BaseModel"""
         try:
-            if not line:
+            if not args:
                 raise SyntaxError()
-            my_list = line.split(" ")
-            obj = eval("{}()".format(my_list[0]))
-            for pair in my_list[1:]:
-                pair = pair.split('=', 1)
-                if len(pair) == 1 or "" in pair:
-                    continue
-                match = re.search('^"(.*)"$', pair[1])
-                cast = str
-                if match:
-                    value = match.group(1)
-                    value = value.replace('_', ' ')
-                    value = re.sub(r'(?<!\\)"', r'\\"', value)
+            nlist = args.split(" ")
+
+            news = {}
+            for i in range(1, len(news)):
+                key, value = tuple(news[i].split("="))
+                if value[0] == '"':
+                    value = value.strip('"').replace("_", " ")
                 else:
-                    value = pair[1]
-                    if "." in value:
-                        cast = float
-                    else:
-                        cast = int
-                try:
-                    value = cast(value)
-                except ValueError:
-                    pass
-                # TODO: escape double quotes for string
-                # TODO: replace '_' with spaces ' ' for string
-                setattr(obj, pair[0], value)
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        continue
+                news[key] = value
+
+            if news == {}:
+                obj = eval(nlist[0])()
+            else:
+                obj = eval(nlist[0])(**news)
+                storage.new(obj)
+            print(obj.id)
             obj.save()
-            print("{}".format(obj.id))
+
         except SyntaxError:
             print("** class name missing **")
         except NameError:
             print("** class doesn't exist **")
 
-    def do_show(self, line):
-        """To show insatances"""
-        from_fileClass = storage.all()
-        arg = line.split()
-
-        if len(arg) == 0:
+    def do_show(self, args):
+        """Prints the string representation of an instance"""
+        try:
+            if not args:
+                raise SyntaxError()
+            nlist = args.split(" ")
+            if nlist[0] not in self.__classes:
+                raise NameError()
+            if len(nlist) < 2:
+                raise IndexError()
+            news = storage.all()
+            key = news[0] + '.' + nlist[1]
+            if key in news:
+                print(news[key])
+            else:
+                raise KeyError()
+        except SyntaxError:
             print("** class name missing **")
-        elif arg[0] not in HBNBCommand.__classNames:
+        except NameError:
             print("** class doesn't exist **")
-        elif len(arg) < 2:
+        except IndexError:
             print("** instance id missing **")
-        elif "{}.{}".format(arg[0], arg[1]) not in from_fileClass:
+        except KeyError:
             print("** no instance found **")
-        else:
-            print(from_fileClass[arg[0] + "." + arg[1]])
 
-    def do_destroy(self, line):
-        """To destroy instances"""
-        from_fileClass = storage.all()
-        arg = line.split()
-
-        if len(arg) == 0:
+    def do_destroy(self, args):
+        """destroy or delete an instance of a class"""
+        try:
+            if not args:
+                raise SyntaxError()
+            nlist = args.split(" ")
+            if nlist[0] not in self.__classes:
+                raise NameError()
+            if len(nlist) < 2:
+                raise IndexError()
+            news = storage.all()
+            key = nlist[0] + '.' + nlist[1]
+            if key in news:
+                del news[key]
+                storage.save()
+            else:
+                raise KeyError()
+        except SyntaxError:
             print("** class name missing **")
-        elif arg[0] not in HBNBCommand.__classNames:
+        except NameError:
             print("** class doesn't exist **")
-        elif len(arg) == 1:
+        except IndexError:
             print("** instance id missing **")
-        elif "{}.{}".format(arg[0], arg[1]) not in from_fileClass:
+        except KeyError:
             print("** no instance found **")
-        else:
-            del from_fileClass[arg[0] + "." + arg[1]]
-            storage.save()
-    
-    def do_all(self, line):
-        """Prints all string representation of all instances
-        Exceptions:
-            NameError: when there is no object taht has the name
-        """
-        objects = storage.all()
-        my_list = []
-        if not line:
-            for key in objects:
-                my_list.append(objects[key])
-            print(my_list)
+
+    def do_all(self, args):
+        """print a list of all available instances of a class"""
+        if not args:
+            obj = storage.all()
+            print([obj[key].__str__() for key in obj])
             return
         try:
-            args = line.split(" ")
-            if args[0] not in self.__classNames:
+            arg = args.split(" ")
+            if arg[0] not in self.__classes:
                 raise NameError()
-            for key in objects:
-                name = key.split('.')
-                if name[0] == args[0]:
-                    my_list.append(objects[key])
-            print(my_list)
+
+            new = eval(arg[0])
+            obj = storage.all(new)
+            print([obj[key].__str__() for key in obj])
+
         except NameError:
             print("** class doesn't exist **")
 
-    def do_count(self, line):
-        """To count instances of the same class"""
-        from_fileClass = storage.all()
-        arg = line.split()
-        total = 0
+    def do_update(self, args):
+        """updates an instance based on class name and id"""
+        try:
+            if not args:
+                raise SyntaxError()
+            nlist = args.split(" ")
+            if nlist[0] not in self.__classes:
+                raise NameError()
+            if len(nlist) < 2:
+                raise IndexError()
+            obj = storage.all()
+            key = nlist[0] + '.' + nlist[1]
+            if key not in obj:
+                raise KeyError()
+            if len(nlist) < 3:
+                raise AttributeError()
+            if len(nlist) < 4:
+                raise ValueError()
+            value = obj[key]
+            try:
+                value.__dict__[nlist[2]] = eval(nlist[3])
+            except Exception:
+                value.__dict__[nlist[2]] = nlist[3]
+                value.save()
 
-        if len(arg) == 1:
-            for key, val in from_fileClass.items():
-                className, id = key.split(".")
-                if arg[0] == className:
-                    total += 1
-            print(total)
-
-    def do_update(self, line):
-        """To update instances"""
-        from_fileClass = storage.all()
-        arg = line.split()
-
-        if len(arg) == 0:
+        except SyntaxError:
             print("** class name missing **")
-        elif arg[0] not in HBNBCommand.__classNames:
+        except NameError:
             print("** class doesn't exist **")
-        elif len(arg) == 1:
+        except IndexError:
             print("** instance id missing **")
-        elif "{}.{}".format(arg[0], arg[1]) not in from_fileClass:
+        except KeyError:
             print("** no instance found **")
-        elif len(arg) == 2:
+        except AttributeError:
             print("** attribute name missing **")
-        elif len(arg) == 3:
+        except ValueError:
             print("** value missing **")
-        elif len(arg) > 4:
-            if "{" in line:
-                _parse = line.split(".")
-                obj_dict = from_fileClass
-                _dict = {key: obj_dict[key].to_dict() for key in obj_dict}
-                for key, val in _dict.items():
-                    if key == "{}.{}".format(arg[0], arg[1]):
-                        _to_dict = json.loads(_parse[1])
-                        val = {**val, **_to_dict}
-                        className = val["__class__"]
-                        storage.new(eval(className)(**val))
-                        storage.save()
+
+    def strip(self, args):
+        """strips the arguments and return a string"""
+        nlist = []
+        nlist.append(args[0])
+        try:
+            mydict = eval(args[1][args[1].find('{'):args[1].find('}')+1])
+        except Exception:
+            mydict = None
+        if type(mydict) == dict:
+            stri = args[1][args[1].find('(')+1:args[1].find(')')]
+            nlist.append((stri.split(', '))[0]).strip('"')
+            nlist.append(mydict)
+            return nlist
+        stri = args[1][args[1].find('(')+1:args[1].find(')')]
+        nlist.append(" ".join(stri.split(", ")))
+        return " ".join(i for i in nlist)
+
+    def default(self, args):
+        """default case"""
+        nlist = args.split('.')
+        if len(nlist) >= 2:
+            if (nlist[1] == "all()"):
+                self.do_all(nlist[0])
+            elif nlist[1][:4] == "show":
+                self.do_show(self.strip(nlist))
+            elif nlist[1][:7] == "destroy":
+                self.do_destroy(self.strip(nlist))
+            elif nlist[1][:6] == "update":
+                args = self.strip(nlist)
+                if isinstance(args, list):
+                    obj = storage.all()
+                    key = args[0] + ' ' + args[1]
+                    for key, value in args[2].items():
+                        self.do_update(key + ' "{}" "{}"'.format(key, value))
+                else:
+                    self.do_update(args)
         else:
-            obj_dict = from_fileClass
-            _dict = {key: obj_dict[key].to_dict() for key in obj_dict}
-            for key, val in _dict.items():
-                if key == "{}.{}".format(arg[0], arg[1]):
-                    val[arg[2]] = arg[3]
-                    className = val["__class__"]
-                    storage.new(eval(className)(**val))
-                    storage.save()
-
-    def emptyline(self):
-        """Overriding emptyline method"""
-        return False
-
-    def do_quit(self, line):
-        """Quit command to exit the program"""
-        exit()
-
-    def do_EOF(self, line):
-        """EOF to exit the program"""
-        print()
-        return True
+            cmd.Cmd.default(self, args)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     HBNBCommand().cmdloop()
