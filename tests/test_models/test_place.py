@@ -1,54 +1,69 @@
 #!/usr/bin/python3
-""" testing Place """
-import unittest
-import pep8
+""" """
+from tests.test_models.test_base_model import test_basemodel
 from models.place import Place
 
 
-class Place_testing(unittest.TestCase):
-    """ check BaseModel """
+class test_Place(test_basemodel):
+    """ """
 
-    def testpep8(self):
-        """ testing codestyle """
-        pepstylecode = pep8.StyleGuide(quiet=True)
-        path_user = 'models/place.py'
-        result = pepstylecode.check_files([path_user])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warnings).")
+    def __init__(self, *args, **kwargs):
+        """ """
+        super().__init__(*args, **kwargs)
+        self.name = "Place"
+        self.value = Place
 
-    def test_cid(self):
-        self.assertEqual(type(Place().city_id), str)
+    def test_city_id(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.city_id), str)
 
-    def test_uid(self):
-        self.assertEqual(type(Place().user_id), str)
+    def test_user_id(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.user_id), str)
 
     def test_name(self):
-        self.assertEqual(type(Place().name), str)
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.name), str)
 
     def test_description(self):
-        self.assertEqual(type(Place().description), str)
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.description), str)
 
-    def test_nuroom(self):
-        self.assertEqual(type(Place().number_rooms), int)
+    def test_number_rooms(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.number_rooms), int)
 
-    def test_nubath(self):
-        self.assertEqual(type(Place().number_bathrooms), int)
+    def test_number_bathrooms(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.number_bathrooms), int)
 
-    def test_maxgu(self):
-        self.assertEqual(type(Place().max_guest), int)
+    def test_max_guest(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.max_guest), int)
 
-    def test_pric(self):
-        self.assertEqual(type(Place().price_by_night), int)
+    def test_price_by_night(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.price_by_night), int)
 
-    def test_lat(self):
-        self.assertEqual(type(Place().latitude), float)
+    def test_latitude(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.latitude), float)
 
-    def test_lon(self):
-        self.assertEqual(type(Place().longitude), float)
+    def test_longitude(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.latitude), float)
 
-    def test_amenid(self):
-        self.assertEqual(type(Place().amenity_ids), list)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_amenity_ids(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.amenity_ids), list)

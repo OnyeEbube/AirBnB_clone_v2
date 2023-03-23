@@ -1,33 +1,34 @@
 #!/usr/bin/python3
-""" testing User """
-import unittest
-import pep8
+""" """
+from tests.test_models.test_base_model import test_basemodel
 from models.user import User
 
 
-class User_testing(unittest.TestCase):
-    """ check BaseModel """
+class test_User(test_basemodel):
+    """ """
 
-    def testpep8(self):
-        """ testing codestyle """
-        pepstylecode = pep8.StyleGuide(quiet=True)
-        path_user = 'models/user.py'
-        result = pepstylecode.check_files([path_user])
-        self.assertEqual(result.total_errors, 0,
-                         "Found code style errors (and warnings).")
+    def __init__(self, *args, **kwargs):
+        """ """
+        super().__init__(*args, **kwargs)
+        self.name = "User"
+        self.value = User
 
-    def test_umail(self):
-        self.assertEqual(type(User().email), str)
+    def test_first_name(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.first_name), str)
 
-    def test_pass(self):
-        self.assertEqual(type(User().password), str)
+    def test_last_name(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.last_name), str)
 
-    def test_fname(self):
-        self.assertEqual(type(User().first_name), str)
+    def test_email(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.email), str)
 
-    def test_lname(self):
-        self.assertEqual(type(User().last_name), str)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_password(self):
+        """ """
+        new = self.value()
+        self.assertEqual(type(new.password), str)
