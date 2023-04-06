@@ -19,10 +19,5 @@ fi
 ln -s /data/web_static/releases/test/ /data/web_static/current
 sudo chown -R ubuntu:ubuntu /data/
 
-server {
-	location /hbnb_static {
-		alias /data/web_static/current/;
-	}
-}
-sudo service nginx restart
-
+sudo sed -i '53i \\tlocation \/hbnb_static {\n\t\t alias /data/web_static/current;\n\t}' /etc/nginx/sites-available/default
+/etc/init.d/nginx restart
