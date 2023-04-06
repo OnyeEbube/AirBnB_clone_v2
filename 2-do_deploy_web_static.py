@@ -3,7 +3,7 @@
 fabric script that generates a .tgz from the contents of web_static
 
 """
-from fabric.api import local
+from fabric.api import *
 from datetime import datetime
 import os
 
@@ -30,7 +30,7 @@ def do_pack():
     t_gzip_archive = local("tar -cvzf {} web_static".format(archived_path))
 
     if t_gzip_archive.succeeded:
-        return archived_f_path
+        return archived_path
     else:
         return None
 
