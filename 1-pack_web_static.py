@@ -1,4 +1,4 @@
-#!/usr/bin/python 3
+#!/usr/bin/python3
 """ 
 fabric script that generates a .tgz from the contents of web_static
 all files in the folder web_static are added to the final archive
