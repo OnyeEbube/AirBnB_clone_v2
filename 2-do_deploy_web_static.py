@@ -38,6 +38,10 @@ def do_pack():
 def do_deploy(archive_path):
     """
         Distribute the archive.
+        all files in the folder web_static are added to the final archive
+        all files in the folder web_static are added to the final archive
+        all files in the folder web_static are added to the final archive
+        all files in the folder web_static are added to the final
     """
     if os.path.exists(archive_path):
         archived_file = archive_path[9:]
