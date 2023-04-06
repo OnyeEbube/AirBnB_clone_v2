@@ -16,6 +16,13 @@ def do_pack():
     """
         returns the archive path if archive has been correctly
         created.
+        all files in the folder web_static are added to the final archive
+        all archives must be stored in the folder versions
+        the name of the archive created has the format
+        web_static_<year><month><day><hour><minute><second>.tgz
+        the function do_pack must return the archive path
+        if the archive has been correctly generated.
+        otherwise, it should return None
     """
 
     local("mkdir -p versions")
