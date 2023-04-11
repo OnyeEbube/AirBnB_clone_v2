@@ -32,6 +32,6 @@ def do_pack():
     t_gzip_archive = local("tar -cvzf {} web_static".format(archived_path))
 
     if t_gzip_archive.succeeded:
-        return archived_f_path
+        return archived_path
     else:
         return None
