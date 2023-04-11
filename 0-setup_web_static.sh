@@ -1,4 +1,4 @@
-#!/bin/bash/env bash
+#!/usr/bin/env bash
 # This script sets up a eb server for the deployment of web_static
 # it Install Nginx if it not already installed, creates the needed folders, a symbolic link
 # gives ownership of the /data/ folder to ubuntu user and group.
