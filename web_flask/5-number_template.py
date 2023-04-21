@@ -5,7 +5,7 @@ and renders a number template
 """
 from flask import Flask, render_template
 
-app = Flask(__name__)
+app = Flask("__name__")
 
 
 @app.route('/', strict_slashes=False)
@@ -15,7 +15,7 @@ def hello_hbnb():
     """
     return ("Hello HBNB!")
 
- 
+
 @app.route("/hbnb", strict_slashes=False)
 def hbnb():
     """
