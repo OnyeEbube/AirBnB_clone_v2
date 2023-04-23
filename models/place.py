@@ -9,7 +9,7 @@ import models
 
 
 place_amenity = Table("place_amenity", Base.metadata,
-                      Column("place_id", String(60),
+                      Column("place_id", String(60, collation='latin1_swedish_ci'),
                              ForeignKey("places.id"),
                              primary_key=True,
                              nullable=False),
